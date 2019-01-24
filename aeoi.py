@@ -40,7 +40,7 @@ else:
 	jiraIssue=raw_input("Jira ticket: ")
 
 try:
-	print (jira.issue(jiraIssue))
+	jira.issue(jiraIssue)
 except:
 	print "Invalid issue number"
 	sys.exit()
