@@ -2,9 +2,8 @@
 Script to check for Jira tickets updates every minute.
 
 ## Python versions
-(This script was created for Python 2 because everybody has it by default. It comes with Mac OS)
-You you happen to have Python 3 installed, don't worry. Just create a "jump" script to call the script.
-For example, if you cloned the git repo to your home folder, here is are the commands you will run, and the results:
+Follow this example and you won't be facing Python version hell issues:
+[Step by step](https://github.com/l4nner/aeoi/blob/master/Step-by-step.txt)
 
 ## Requirements
 - Python 2
