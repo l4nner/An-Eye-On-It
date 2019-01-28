@@ -1,14 +1,18 @@
+// Star by making sure you are in your home folder and go from there:
+
 $ pwd
 /Users/flcardos
 $ git clone http://www.github.com/l4nner/aeoi
 Cloning into 'aeoi'...
-$ ls -lisa aeoi/aeoi.py 
+$ ls -lisa aeoi/aeoi.py 
 16281003 16 -rw-r--r--  1 flcardos  staff  4146 Jan 28 07:49 aeoi/aeoi.py
-$ chmod u+x aeoi/aeoi.py 
+$ chmod u+x aeoi/aeoi.py 
 $ cat > /usr/local/bin/aeoi <<EOF
 > python ~/aeoi/aeoi.py
 > EOF
 $ ls -lisa /usr/local/bin/aeoi 
 16281236 8 -rw-r--r--  1 flcardos  wheel  22 Jan 28 07:52 /usr/local/bin/aeoi
-$ chmod u+x /usr/local/bin/aeoi 
+$ chmod u+x /usr/local/bin/aeoi 
 $
+
+// Done. Ready to start using it by entering "aeoi" from anywhere.
