@@ -110,8 +110,3 @@ else:
                 break
     except BaseException:
         print "Invalid issue number"
-
-
-    
-
-
