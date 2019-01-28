@@ -7,30 +7,18 @@ You you happen to have Python 3 installed, don't worry. Just create a "jump" scr
 For example, if you cloned the git repo to your home folder:
 `
 $ pwd
-
 /Users/flcardos
-
 $ git clone http://www.github.com/l4nner/aeoi
-
 Cloning into 'aeoi'...
-
 $ ls -lisa aeoi/aeoi.py 
-
 16281003 16 -rw-r--r--  1 flcardos  staff  4146 Jan 28 07:49 aeoi/aeoi.py
-
 $ chmod u+x aeoi/aeoi.py 
-
 $ cat > /usr/local/bin/aeoi <<EOF
-
 > python ~/aeoi/aeoi.py
-
 > EOF
 $ ls -lisa /usr/local/bin/aeoi 
-
 16281236 8 -rw-r--r--  1 flcardos  wheel  22 Jan 28 07:52 /usr/local/bin/aeoi
-
 $ chmod u+x /usr/local/bin/aeoi 
-
 `
 
 ## Requirements
