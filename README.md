@@ -23,3 +23,5 @@ Follow this example and you won't be facing Python version hell issues:
       
       $ aeoi w
       $ aeoi watcher
+
+Note: no parameter defaults to reported issues
