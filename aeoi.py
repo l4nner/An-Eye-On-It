@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Beta 3.0
+# Beta 2.0
 
 import os
 import sys
@@ -12,22 +12,33 @@ from time import sleep
 from os import popen
 import subprocess
 
+# we didn't have a budget for multiple parameters
+
 if len(sys.argv) >= 3:
     print "Number of parameters is invalid"
     sys.exit()
 
 requests.packages.urllib3.disable_warnings()
 
+# variables
+
 configFile = 'aeoiconfig.txt'
 homeFolder = os.environ['HOME']
 jiraSrvFqdn = 'jira-sd.mc1.oracleiaas.com'
-pro = 'https'
+protocol = 'https'
 listAware = [False for _ in range(1,40)]
 validParameters = ["reporter", "r", "watcher", "w"]
+listIssue=[]
+listSummary=[]
+listComments=[]
 
-def linkPrint(pro, server, issue):
-    uri = '{}://{}/browse/{}'.format(pro, server, issue)
+# to print an URI
+
+def linkPrint(protocol, server, issue):
+    uri = '{}://{}/browse/{}'.format(protocol, server, issue)
     print(uri)
+
+# to play a sound file
 
 def alertSound(audioFile,external,internal):
     if os.path.exists(audioFile):
@@ -37,6 +48,7 @@ def alertSound(audioFile,external,internal):
             time.sleep(0.5)
 
 # If email/login still not available, asks for input
+
 if not os.path.exists(homeFolder + "/" + configFile):
     userName = raw_input("Enter your Oracle SSO account (Full.Name@Oracle.com): ")
     if re.match(r"\w+\.\w+@oracle.com", userName):
@@ -46,12 +58,16 @@ if not os.path.exists(homeFolder + "/" + configFile):
         sys.exit()
 userName = (subprocess.check_output('grep -i "@oracle.com" ~/aeoiconfig.txt', shell=True)).rstrip()
 
+# Getting a tocken from our jit server
+
 try:
     jitToken = popen('ssh webadm-jit-01001.node.ad1.mc1 -p 22222 "generate --mode password"').read()
 except KeyboardInterrupt:
     sys.exit()
 
-jira = JIRA(server=pro+'://'+jiraSrvFqdn, basic_auth=(userName,jitToken), options={'verify': False})
+jira = JIRA(server=protocol+'://'+jiraSrvFqdn, basic_auth=(userName,jitToken), options={'verify': False})
+
+# if no parameters or a valid parameter, other than the ticket number
 
 if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameters ):
     if len(sys.argv) == 1:
@@ -68,39 +84,42 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
         sys.exit()
     try:
 
-        index=0
-        listIssue=[]
-        listSummary=[]
-        listComments=[]
-        
         # creates ticket list
+
         for issue in jira.search_issues(jiraField + ' = currentUser() AND status not in (Resolved, Closed) order by created desc'):
             listIssue.append(str(issue.key))
             listSummary.append(str(issue.fields.summary))
             listComments.append(len(jira.comments(issue)))
-            index += 1
         
         # initial number of issues
+
         numberIssuesWatermark = (len(listIssue))
         
         # enters the loop until number of tickets change or user interrupts
+
         while True:
             os.system('clear')
             print "\nLast check: ",datetime.datetime.now().strftime("%-I:%M"),"\t*",(jiraField.upper()),"*\n"
             index=0
+
+            # goes over active tickets
+            
             while index < numberIssuesWatermark:
-                if listComments[index] > listCommentsWatermark[index]:
+
+                # If the ticket changed
+
+                if listComments[index] != listCommentsWatermark[index]:
                     print "\033[44;96m",listIssue[index],"\t", listSummary[index],"\033[0m"
-                    linkPrint(pro, jiraSrvFqdn, str(issue.key))
+                    linkPrint(protocol, jiraSrvFqdn, str(listIssue[index]))
                     if listAware[index] == False:
                         alertSound("/System/Library/Sounds/Glass.aiff", 2, 2)
                         listAware[index] = True
-                else:
-                    print listIssue[index],"\t", listSummary[index]
+                else: print listIssue[index],"\t", listSummary[index]
                 index += 1
+
             print "\n^C to cancel"
             sleep(120)
-            index=0
+
             listIssue=[]
             listSummary=[]
             listComments=[]
@@ -108,9 +127,9 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
                 listIssue.append(str(issue.key))
                 listSummary.append(str(issue.fields.summary))
                 listComments.append(len(jira.comments(issue)))
-                index += 1
+            
+            # if the number of tickets changed, just list all of them and leave
             if len(listIssue) != numberIssuesWatermark:
-                # if the number of tickets changed, just list all of them and leave
                 print "\n\n* * Number of active items changed to:\n"
                 index=0
                 alertSound("/System/Library/Sounds/Glass.aiff", 2, 2)
@@ -122,6 +141,9 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
     except KeyboardInterrupt:
         print ""
         pass
+
+# if a ticket number was provided 
+
 else:
     jiraIssue = sys.argv[1]
     try:
@@ -137,7 +159,7 @@ else:
                 alertSound("/System/Library/Sounds/Morse.aiff", 1, 3)
                 print "\033[44;96* * TICKET UPDATED * *\033[0m\n\t\t"
                 print "\t\t"
-                linkPrint(pro , jiraSrvFqdn , jiraIssue)
+                linkPrint(protocol , jiraSrvFqdn , jiraIssue)
                 break
     except BaseException:
         print "Invalid issue number"
