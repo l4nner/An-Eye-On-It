@@ -41,7 +41,7 @@ colorcode={
 # to print an URI
 
 def linkPrint(protocol, server, issue):
-    uri = '{}://{}/browse/{}'.format(protocol, server, issue)
+    uri = ' {}://{}/browse/{}'.format(protocol, server, issue)
     print(uri)
 
 # to play a sound file
