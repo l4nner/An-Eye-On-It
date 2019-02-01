@@ -27,10 +27,16 @@ homeFolder = os.environ['HOME']
 jiraSrvFqdn = 'jira-sd.mc1.oracleiaas.com'
 protocol = 'https'
 listAware = [False for _ in range(1,40)]
-validParameters = ["reporter", "r", "watcher", "w"]
+validParameters = ["reporter", "r", "watcher", "w", "12", "24"]
 listIssue=[]
 listSummary=[]
 listComments=[]
+colorcode={
+    "mediumblue": "\033[94m",
+    "bluebackground": "\033[44;96m",
+    "gray": "\033[90m",
+    "auto": "\033[0m"
+}
 
 # to print an URI
 
@@ -75,6 +81,20 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
     else:
         if sys.argv[1] in ["reporter", "r"]: jiraField="reporter"
         elif sys.argv[1] in ["watcher", "w"]: jiraField="watcher"
+        
+        # testing this one----------------------------------
+        if sys.argv[1] in ["12", "24"]:
+            numberOfHours = sys.argv[1]
+            for issue in jira.search_issues(' reporter = currentUser() and updatedDate > -'+numberOfHours+'h'):
+                listIssue.append(str(issue.key))
+                listSummary.append(str(issue.fields.summary))
+                listComments.append(len(jira.comments(issue)))
+            index=0
+            while index < len(listIssue):
+                print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
+                index += 1
+            sys.exit()
+            
     listCommentsWatermark=[]
     try:
         for issue in jira.search_issues( jiraField +' = currentUser() AND status not in (Resolved, Closed) order by created desc'):
@@ -95,7 +115,7 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
 
         numberIssuesWatermark = (len(listIssue))
         
-        # enters the loop until number of tickets change or user interrupts
+        # enters the loop until number of tickets change or user interrupts 
 
         while True:
             os.system('clear')
@@ -109,13 +129,13 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
                 # If the ticket changed
 
                 if listComments[index] != listCommentsWatermark[index]:
-                    print "\033[44;96m",listIssue[index],"\t", listSummary[index],"\033[0m"
+                    print colorcode["bluebackground"],listIssue[index],"\t", listSummary[index],colorcode["auto"]
                     linkPrint(protocol, jiraSrvFqdn, str(listIssue[index]))
                     if listAware[index] == False:
                         alertSound("/System/Library/Sounds/Glass.aiff", 2, 2)
                         listAware[index] = True
                 else:
-                    print "\033[94m",listIssue[index],"\t",listSummary[index],"\033[0m"
+                    print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
                 index += 1
 
             print "\n^C to cancel"
@@ -135,7 +155,7 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
                 index=0
                 alertSound("/System/Library/Sounds/Glass.aiff", 2, 2)
                 while index < len(listIssue):
-                    print "\033[90m",listIssue[index],"\t",listSummary[index],"\033[0m"
+                    print colorcode["gray"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
                     index += 1
                 print "\n\n"
                 break             
@@ -158,7 +178,7 @@ else:
 			    sleep(60)
             else:
                 alertSound("/System/Library/Sounds/Morse.aiff", 1, 3)
-                print "\033[44;96* * TICKET UPDATED * *\033[0m\n\t\t"
+                print colorcode["bluebackground"], "* * TICKET UPDATED * *\n\t\t",colorcode["auto"]
                 print "\t\t"
                 linkPrint(protocol , jiraSrvFqdn , jiraIssue)
                 break
