@@ -114,7 +114,8 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
                     if listAware[index] == False:
                         alertSound("/System/Library/Sounds/Glass.aiff", 2, 2)
                         listAware[index] = True
-                else: print listIssue[index],"\t", listSummary[index]
+                else:
+                    print "\033[94m",listIssue[index],"\t",listSummary[index],"\033[0m"
                 index += 1
 
             print "\n^C to cancel"
