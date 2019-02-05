@@ -81,7 +81,7 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
     else:
         if sys.argv[1] in ["reporter", "r"]: jiraField="reporter"
         elif sys.argv[1] in ["watcher", "w"]: jiraField="watcher"
-        if int(sys.argv[1]) in range(1,maxNumberHours,1):
+        elif int(sys.argv[1]) in range(1,maxNumberHours,1):
             numberOfHours = sys.argv[1]
             for issue in jira.search_issues(' reporter = currentUser() and updatedDate > -'+numberOfHours+'h'):
                 listIssue.append(str(issue.key))
