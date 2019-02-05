@@ -27,7 +27,7 @@ homeFolder = os.environ['HOME']
 jiraSrvFqdn = 'jira-sd.mc1.oracleiaas.com'
 protocol = 'https'
 listAware = [False for _ in range(1,40)]
-validParameters = ["reporter", "r", "watcher", "w", "12", "24"]
+validParameters = ["reporter", "r", "watcher", "w"]
 listIssue=[]
 listSummary=[]
 listComments=[]
@@ -35,8 +35,8 @@ colorcode={
     "mediumblue": "\033[94m",
     "bluebackground": "\033[44;96m",
     "gray": "\033[90m",
-    "auto": "\033[0m"
-}
+    "auto": "\033[0m"}
+maxNumberHours = 730
 
 # to print an URI
 
@@ -75,15 +75,13 @@ jira = JIRA(server=protocol+'://'+jiraSrvFqdn, basic_auth=(userName,jitToken), o
 
 # if no parameters or a valid parameter, other than the ticket number
 
-if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameters ):
+if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameters ) or ( 1 <= int(sys.argv[1]) <= maxNumberHours ):
     if len(sys.argv) == 1:
         jiraField = "reporter"
     else:
         if sys.argv[1] in ["reporter", "r"]: jiraField="reporter"
         elif sys.argv[1] in ["watcher", "w"]: jiraField="watcher"
-        
-        # testing this one----------------------------------
-        if sys.argv[1] in ["12", "24"]:
+        if int(sys.argv[1]) in range(1,maxNumberHours,1):
             numberOfHours = sys.argv[1]
             for issue in jira.search_issues(' reporter = currentUser() and updatedDate > -'+numberOfHours+'h'):
                 listIssue.append(str(issue.key))
@@ -94,7 +92,6 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
                 print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
                 index += 1
             sys.exit()
-            
     listCommentsWatermark=[]
     try:
         for issue in jira.search_issues( jiraField +' = currentUser() AND status not in (Resolved, Closed) order by created desc'):
