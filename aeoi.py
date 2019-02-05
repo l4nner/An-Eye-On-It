@@ -64,7 +64,7 @@ if not os.path.exists(homeFolder + "/" + configFile):
         sys.exit()
 userName = (subprocess.check_output('grep -i "@oracle.com" ~/aeoiconfig.txt', shell=True)).rstrip()
 
-# Getting a tocken from our jit server
+# Getting a token from our jit server
 
 try:
     jitToken = popen('ssh webadm-jit-01001.node.ad1.mc1 -p 22222 "generate --mode password"').read()
