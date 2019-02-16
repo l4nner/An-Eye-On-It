@@ -64,7 +64,7 @@ if not os.path.exists(homeFolder + "/" + configFile):
         sys.exit()
 userName = (subprocess.check_output('grep -i "@oracle.com" ~/aeoiconfig.txt', shell=True)).rstrip()
 
-# Getting a token from our jit server
+# Getting a tocken from our jit server
 
 try:
     jitToken = popen('ssh webadm-jit-01001.node.ad1.mc1 -p 22222 "generate --mode password"').read()
@@ -87,10 +87,13 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
                 listIssue.append(str(issue.key))
                 listSummary.append(str(issue.fields.summary))
                 listComments.append(len(jira.comments(issue)))
-            index=0
-            while index < len(listIssue):
-                print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
-                index += 1
+            if len(listIssue) == 0:
+                print colorcode["mediumblue"],"No ticket updates within the last ",numberOfHours," hours.",colorcode["auto"]
+            else:
+                index=0
+                while index < len(listIssue):
+                    print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
+                    index += 1
             sys.exit()
     listCommentsWatermark=[]
     try:
