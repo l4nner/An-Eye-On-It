@@ -91,7 +91,7 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
                 listSummary.append(str(issue.fields.summary))
                 listComments.append(len(jira.comments(issue)))
             if len(listIssue) == 0:
-                print colorcode["mediumblue"],"No ticket updates within the last ",numberOfHours," hours.",colorcode["auto"]
+                print colorcode["mediumblue"],"No ticket updates within the last",numberOfHours,"hours.",colorcode["auto"]
             else:
                 index=0
                 while index < len(listIssue):
