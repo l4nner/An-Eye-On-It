@@ -12,12 +12,6 @@ from time import sleep
 from os import popen
 import subprocess
 
-# we didn't have a budget for multiple parameters
-
-if len(sys.argv) >= 3:
-    print "Number of parameters is invalid"
-    sys.exit()
-
 requests.packages.urllib3.disable_warnings()
 
 # variables
@@ -28,6 +22,7 @@ jiraSrvFqdn = 'jira-sd.mc1.oracleiaas.com'
 protocol = 'https'
 listAware = [False for _ in range(1,40)]
 validParameters = ["reporter", "r", "watcher", "w"]
+optionNumberofHours = ["-h", "--hours", "--hour", "-H"]
 listIssue=[]
 listSummary=[]
 listComments=[]
@@ -37,6 +32,12 @@ colorcode={
     "gray": "\033[90m",
     "auto": "\033[0m"}
 maxNumberHours = 730
+
+# it only accepts more than one parameter if entering the option for past number of hours
+
+if (len(sys.argv) >= 3) and not (sys.argv[1] in optionNumberofHours) :
+    print "Number of parameters is invalid"
+    sys.exit()
 
 # to print an URI
 
@@ -75,29 +76,32 @@ jira = JIRA(server=protocol+'://'+jiraSrvFqdn, basic_auth=(userName,jitToken), o
 
 # if no parameters or a valid parameter, other than the ticket number
 
-if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameters ) or (sys.argv[1]).isdigit():
-    if not ( 1 <= int(sys.argv[1]) <= maxNumberHours ):
-        print "Maximum number of ours is",maxNumberHours
-        sys.exit()
+if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameters ) or (sys.argv[1] in optionNumberofHours):
     if len(sys.argv) == 1:
         jiraField = "reporter"
     else:
-        if sys.argv[1] in ["reporter", "r"]: jiraField="reporter"
-        elif sys.argv[1] in ["watcher", "w"]: jiraField="watcher"
-        elif int(sys.argv[1]) in range(1,maxNumberHours,1):
-            numberOfHours = sys.argv[1]
-            for issue in jira.search_issues(' reporter = currentUser() and updatedDate > -'+numberOfHours+'h'):
-                listIssue.append(str(issue.key))
-                listSummary.append(str(issue.fields.summary))
-                listComments.append(len(jira.comments(issue)))
-            if len(listIssue) == 0:
-                print colorcode["mediumblue"],"No ticket updates within the last",numberOfHours,"hours.",colorcode["auto"]
-            else:
-                index=0
-                while index < len(listIssue):
-                    print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
-                    index += 1
+        # if -h or --hour parameter was provided
+        if (sys.argv[1] in optionNumberofHours) and ( int(sys.argv[2]) in range(1,maxNumberHours,1)):
+            if ( int(sys.argv[2]) in range(1,maxNumberHours,1)):
+                numberOfHours = sys.argv[2]
+                for issue in jira.search_issues(' reporter = currentUser() and updatedDate > -'+numberOfHours+'h'):
+                    listIssue.append(str(issue.key))
+                    listSummary.append(str(issue.fields.summary))
+                    listComments.append(len(jira.comments(issue)))
+                if len(listIssue) == 0:
+                    print colorcode["mediumblue"],"No ticket updates within the last ",numberOfHours," hours.",colorcode["auto"]
+                else:
+                    index=0
+                    while index < len(listIssue):
+                        print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
+                        index += 1
+                sys.exit()
+            print "Maximum number of ours is",maxNumberHours
             sys.exit()
+        else:
+            if sys.argv[1] in ["reporter", "r"]: jiraField="reporter"
+            elif sys.argv[1] in ["watcher", "w"]: jiraField="watcher"
+    
     listCommentsWatermark=[]
     try:
         for issue in jira.search_issues( jiraField +' = currentUser() AND status not in (Resolved, Closed) order by created desc'):
