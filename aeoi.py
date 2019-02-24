@@ -46,10 +46,10 @@ def linkPrint(protocol, server, issue):
 
 # to play a sound file
 
-def alertSound(audioFile,external,internal):
+def alertSound(audioFile,externalLoop,internalLoop):
     if os.path.exists(audioFile):
-        for _ in range(0, external):
-            for _ in range(0, internal):
+        for _ in range(0, externalLoop):
+            for _ in range(0, internalLoop):
                 subprocess.call("afplay " + audioFile, shell=True)
             time.sleep(0.5)
 
@@ -75,7 +75,10 @@ jira = JIRA(server=protocol+'://'+jiraSrvFqdn, basic_auth=(userName,jitToken), o
 
 # if no parameters or a valid parameter, other than the ticket number
 
-if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameters ) or ( 1 <= int(sys.argv[1]) <= maxNumberHours ):
+if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameters ) or (sys.argv[1]).isdigit():
+    if not ( 1 <= int(sys.argv[1]) <= maxNumberHours ):
+        print "Maximum number of ours is",maxNumberHours
+        sys.exit()
     if len(sys.argv) == 1:
         jiraField = "reporter"
     else:
@@ -88,7 +91,7 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
                 listSummary.append(str(issue.fields.summary))
                 listComments.append(len(jira.comments(issue)))
             if len(listIssue) == 0:
-                print colorcode["mediumblue"],"No ticket updates within the last",numberOfHours,"hours.",colorcode["auto"]
+                print colorcode["mediumblue"],"No ticket updates within the last ",numberOfHours," hours.",colorcode["auto"]
             else:
                 index=0
                 while index < len(listIssue):
