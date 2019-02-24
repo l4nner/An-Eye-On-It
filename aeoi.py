@@ -96,7 +96,7 @@ if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameter
                         print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
                         index += 1
                 sys.exit()
-            print "Maximum number of ours is",maxNumberHours
+            print "Maximum number of hours is",maxNumberHours
             sys.exit()
         else:
             if sys.argv[1] in ["reporter", "r"]: jiraField="reporter"
