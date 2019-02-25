@@ -23,5 +23,9 @@ Follow this example and you won't be facing Python version hell issues:
       
       $ aeoi w
       $ aeoi watcher
-
+      
+* Tickets updated within the last x hours
+      
+      $ aeoi -h|--hour|--hours <x>
+      
 Note: no parameter defaults to reported issues
