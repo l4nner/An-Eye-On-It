@@ -22,7 +22,7 @@ jiraSrvFqdn = 'jira-sd.mc1.oracleiaas.com'
 protocol = 'https'
 listAware = [False for _ in range(1,40)]
 validParameters = ["reporter", "r", "watcher", "w"]
-optionNumberofHours = ["-h", "--hours", "--hour", "-H"]
+optionNumberOfHours = ["-h", "--hours", "--hour", "-H"]
 listIssue=[]
 listSummary=[]
 listComments=[]
@@ -33,14 +33,26 @@ colorcode={
     "auto": "\033[0m"}
 maxNumberHours = 730
 
-# it only accepts more than one parameter if entering the option for past number of hours
 
-if (len(sys.argv) >= 3) and not (sys.argv[1] in optionNumberofHours) :
+# it only accepts more than one parameter if entering the option for past number of hours
+if (len(sys.argv) >= 3) and not (sys.argv[1] in optionNumberOfHours) :
     print "Number of parameters is invalid"
     sys.exit()
 
-# to print an URI
 
+# if no parameter, defaults to listing cases where user is reporter
+if len(sys.argv) == 1:
+    jiraField = "reporter"
+# leave execution if the number of hours is over the limit
+else:
+    if (sys.argv[1] in optionNumberOfHours):
+        if (int(sys.argv[2]) in range(1,maxNumberHours,1)):
+            numberOfHours = sys.argv[2]
+        else:
+            print "Maximum number of hours is",maxNumberHours
+            sys.exit()
+
+# to print an URI
 def linkPrint(protocol, server, issue):
     uri = ' {}://{}/browse/{}'.format(protocol, server, issue)
     print(uri)
@@ -55,7 +67,6 @@ def alertSound(audioFile,externalLoop,internalLoop):
             time.sleep(0.5)
 
 # If email/login still not available, asks for input
-
 if not os.path.exists(homeFolder + "/" + configFile):
     userName = raw_input("Enter your Oracle SSO account (Full.Name@Oracle.com): ")
     if re.match(r"\w+\.\w+@oracle.com", userName):
@@ -66,7 +77,6 @@ if not os.path.exists(homeFolder + "/" + configFile):
 userName = (subprocess.check_output('grep -i "@oracle.com" ~/aeoiconfig.txt', shell=True)).rstrip()
 
 # Getting a tocken from our jit server
-
 try:
     jitToken = popen('ssh webadm-jit-01001.node.ad1.mc1 -p 22222 "generate --mode password"').read()
 except KeyboardInterrupt:
@@ -76,29 +86,25 @@ jira = JIRA(server=protocol+'://'+jiraSrvFqdn, basic_auth=(userName,jitToken), o
 
 # if no parameters or a valid parameter, other than the ticket number
 
-if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameters ) or (sys.argv[1] in optionNumberofHours):
-    if len(sys.argv) == 1:
-        jiraField = "reporter"
-    else:
-        # if -h or --hour parameter was provided
-        if (sys.argv[1] in optionNumberofHours) and ( int(sys.argv[2]) in range(1,maxNumberHours,1)):
-            if ( int(sys.argv[2]) in range(1,maxNumberHours,1)):
-                numberOfHours = sys.argv[2]
-                for issue in jira.search_issues(' reporter = currentUser() and updatedDate > -'+numberOfHours+'h'):
-                    listIssue.append(str(issue.key))
-                    listSummary.append(str(issue.fields.summary))
-                    listComments.append(len(jira.comments(issue)))
-                if len(listIssue) == 0:
-                    print colorcode["mediumblue"],"No ticket updates within the last ",numberOfHours," hours.",colorcode["auto"]
-                else:
-                    index=0
-                    while index < len(listIssue):
-                        print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
-                        index += 1
-                sys.exit()
-            print "Maximum number of hours is",maxNumberHours
+if (len(sys.argv) == 1) or (len(sys.argv) == 2 and sys.argv[1] in validParameters ) or (sys.argv[1] in optionNumberOfHours):
+
+    if (len(sys.argv) <> 1) and (sys.argv[1] in optionNumberOfHours): #need to improve this questions. I'm asking more than once.
+        if int(sys.argv[2]):
+            for issue in jira.search_issues(' reporter = currentUser() and updatedDate > -'+numberOfHours+'h'):
+                listIssue.append(str(issue.key))
+                listSummary.append(str(issue.fields.summary))
+                listComments.append(len(jira.comments(issue)))
+            if len(listIssue) == 0:
+                print colorcode["mediumblue"],"No ticket updates within the last ",numberOfHours," hours.",colorcode["auto"]
+            else:
+                index=0
+                while index < len(listIssue):
+                    print colorcode["mediumblue"],listIssue[index],"\t",listSummary[index],colorcode["auto"]
+                    index += 1
             sys.exit()
-        else:
+    else:
+        if (len(sys.argv) <> 1):
+            # reporter is already the default option when entering nothing. Still, keeping the structure for readability.
             if sys.argv[1] in ["reporter", "r"]: jiraField="reporter"
             elif sys.argv[1] in ["watcher", "w"]: jiraField="watcher"
     
