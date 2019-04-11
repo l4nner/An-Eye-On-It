@@ -42,7 +42,7 @@ if (len(sys.argv) >= 3) and not (sys.argv[1] in optionNumberOfHours) :
 
 # if no parameter, defaults to listing cases where user is reporter
 if len(sys.argv) == 1:
-    jiraField = "reporter"
+    jiraField = "watcher"
 # leave execution if the number of hours is over the limit
 else:
     if (sys.argv[1] in optionNumberOfHours):
